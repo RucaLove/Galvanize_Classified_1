@@ -4,28 +4,22 @@
 const express = require('express');
 const router = express.Router();
 const knex = require('../knex')
-
+const humps = require('humps')
 
 router.get('/', function(req, res) {
   knex('classifieds')
-  .select(['id', 'title', "description", "price", "item_image"])
+  .select('id', 'title', 'description', 'price', 'item_image')
     .then((classifieds) => {
-        res.json(classifieds);
+      res.json(classifieds);
     })
-    .catch((err) => {
-        next(err);
-    });
 });
 
 router.get('/:id', function(req, res) {
   knex('classifieds')
-  .select(['id', 'title', "description", "price", "item_image"])
+  .select('id', 'title', 'description', 'price', 'item_image')
     .then((classifieds) => {
-        res.json(classifieds[0]);
+      res.json(classifieds[0]);
     })
-    .catch((err) => {
-        next(err);
-    });
 });
 
 // router.post('/', function(req, res) {
@@ -34,12 +28,36 @@ router.get('/:id', function(req, res) {
 //     title: req.body.title,
 //     description: req.body.desrciption,
 //     price: req.body.price,
+//     item_image: req.body.itemImage
 //   })
-//   .then(function(classifieds) {
-//     res.send(classifieds[0]);
-//   }).catch(function(err) {
-//     res.send(err);
-//   });
+//   .returning(["id", "title", "description", "price", "item_image"])
+//   .then((classifieds) => {
+//     res.json(humps.camelizeKeys(classifieds[0]));
+//   })
 // });
+
+router.patch('/:id', function(req, res, next) {
+  knex('classifieds')
+  .update({
+    title: req.body.title,
+    description: req.body.desrciption,
+    price: req.body.price,
+    item_image: req.body.itemImage
+  })
+  .returning(["id", "title", "description", "price", "item_image"])
+  .then(classifieds => {
+    res.json(classifieds[0])
+  })
+})
+
+router.delete('/:id', function(req, res, next) {
+  knex('classifieds')
+  .where('id', req.params.id)
+  .del()
+  .returning(["id", "title", "description", "price", "item_image"])
+  .then(classifieds => {
+    res.send(classifieds[0])
+  })
+})
 
 module.exports = router;
